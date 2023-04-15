@@ -24,35 +24,62 @@ def get_frequencies(fname):
 # given a dictionary f mapping characters to frequencies, 
 # create a prefix code tree using Huffman's algorithm
 def make_huffman_tree(f):
-    p = queue.PriorityQueue()
-    # construct heap from frequencies, the initial items should be
-    # the leaves of the final tree
-    for c in f.keys():
-        p.put(TreeNode(None,None,(f[c], c)))
+  freq = {}
+  for char in f:
+    freq[char] = freq.get(char, 0) + 1
 
-    # greedily remove the two nodes x and y with lowest frequency,
-    # create a new node z with x and y as children,
-    # insert z into the priority queue (using an empty character "")
-    while (p.qsize() > 1):
-        # TODO
-        
-    # return root of the tree
-    return p.get()
+   
+  queue = [Node(char=c, freq=f) for c, f in freq.items()]
+  queue.sort(key=lambda n: n.freq)
+
+    # Build the Huffman tree by repeatedly merging nodes with the lowest frequency
+  while len(queue) > 1:
+    left = queue.pop(0)
+    right = queue.pop(0)
+    parent = Node(freq=left.freq + right.freq, left=left, right=right)
+    queue.append(parent)
+    queue.sort(key=lambda n: n.freq)
+
+  return queue[0]
 
 # perform a traversal on the prefix code tree to collect all encodings
 def get_code(node, prefix="", code={}):
-    # TODO - perform a tree traversal and collect encodings for leaves in code
-    pass
+ if (node.left == None) and (node.right == None):
+        code[node.data[1]] = prefix
+
+    if node.right:
+        get_code(node.right, prefix + "1")
+    if node.left:
+        get_code(node.left, prefix + "0")
+    return code
+  
+    
+
+  
+
 
 # given an alphabet and frequencies, compute the cost of a fixed length encoding
 def fixed_length_cost(f):
-    # TODO
-    pass
+  get_frequencies(f)
+    
 
 # given a Huffman encoding and character frequencies, compute cost of a Huffman encoding
 def huffman_cost(C, f):
-    # TODO
-    pass
+  if not C or not f:
+    return None
+
+  cost = 0
+  freq = {}
+  for char in C:
+    freq[char] = freq.get(char,0)+1
+
+  for char, freq in freq.items():
+    node = Node(char)
+    code_len = len(node.code)
+    cost += freq * code_len
+  return cost
+
+
 
 f = get_frequencies('f1.txt')
 print("Fixed-length cost:  %d" % fixed_length_cost(f))
